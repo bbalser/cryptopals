@@ -2,6 +2,8 @@ defmodule Cryptopals.Sets.Set1Test do
   use ExUnit.Case
 
   alias Cryptopals.Base64
+  alias Cryptopals.Bytes
+  alias Cryptopals.Cipher
   alias Cryptopals.Hex
 
   describe "challenge 1" do
@@ -15,6 +17,50 @@ defmodule Cryptopals.Sets.Set1Test do
         |> Base64.encode()
 
       assert "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t" == result
+    end
+  end
+
+  describe "challenge 2" do
+    test "Fixed XOR" do
+      input1 = "1c0111001f010100061a024b53535009181c" |> Hex.decode()
+      input2 = "686974207468652062756c6c277320657965" |> Hex.decode()
+
+      result = Bytes.xor(input1, input2) |> Hex.encode()
+
+      assert "746865206b696420646f6e277420706c6179" == result
+    end
+  end
+
+  describe "challenge 3" do
+    test "single byte key decryption" do
+      input = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"
+      input_bytes = Hex.decode(input)
+
+      result = Cipher.decrypt(input_bytes)
+
+      assert "Cooking MC's like a pound of bacon" == result
+    end
+  end
+
+  describe "challenge 4" do
+    test "correct entry" do
+      input = "7b5a4215415d544115415d5015455447414c155c46155f4058455c5b523f"
+      input_bytes = Hex.decode(input)
+
+      result = Cipher.decrypt(input_bytes)
+
+      assert "Now that the party is jumping\n" == result
+    end
+
+    test "detect single character XOR from file" do
+      result =
+        File.stream!("challenge4.txt")
+        |> Stream.map(&String.trim/1)
+        |> Stream.map(&Hex.decode/1)
+        |> Stream.map(&Cipher.decrypt/1)
+        |> Enum.max_by(&Cryptopals.English.score/1)
+
+      assert "Now that the party is jumping\n" == result
     end
   end
 end
