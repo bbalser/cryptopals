@@ -1,7 +1,12 @@
 defmodule Cryptopals.Bytes do
 
-  def xor(binary1, binary2) do
-    do_xor(binary1, binary2, <<>>)
+  def xor(binary, key) do
+    binary_list = :binary.bin_to_list(binary)
+    key_list = :binary.bin_to_list(key)
+
+    Enum.zip(binary_list, Stream.cycle(key_list))
+    |> Enum.map(fn {b, k} -> do_xor(<<b>>, <<k>>, <<>>) end)
+    |> :binary.list_to_bin()
   end
 
   defp do_xor(<<>>, <<>>, buf), do: buf
